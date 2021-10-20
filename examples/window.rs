@@ -6,6 +6,8 @@ use winit::{
 };
 
 fn main() {
+    let start = std::time::Instant::now();
+    let mut first = true;
     SimpleLogger::new().init().unwrap();
     let event_loop = EventLoop::new();
 
@@ -17,16 +19,17 @@ fn main() {
 
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Wait;
-        println!("{:?}", event);
 
         match event {
             Event::WindowEvent {
                 event: WindowEvent::CloseRequested,
                 window_id,
             } if window_id == window.id() => *control_flow = ControlFlow::Exit,
-            Event::MainEventsCleared => {
-                window.request_redraw();
+            Event::RedrawRequested(..) if first => {
+                first = false;
+                println!("Time of first redraw: {:?}", start.elapsed());
             }
+            Event::MainEventsCleared => {}
             _ => (),
         }
     });
